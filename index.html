@@ -3,441 +3,502 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Discrete Spacetime — Causal Set Visualization</title>
+<title>Discrete Spacetime — Full Framework Visualization</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#050510;color:#c8c8d0;font-family:'DM Sans',sans-serif;overflow:hidden;height:100vh;width:100vw}
+body{background:#050510;color:#c8c8d0;font-family:'DM Sans',sans-serif;overflow:hidden;height:100vh;width:100vw;user-select:none}
 canvas{display:block;position:fixed;inset:0;z-index:1}
 .ui{position:fixed;z-index:10;pointer-events:none}
-.ui *{pointer-events:auto}
-.panel{background:rgba(8,8,20,0.88);backdrop-filter:blur(20px);border:1px solid rgba(123,140,255,0.1);border-radius:12px;padding:14px 18px}
-.top{top:16px;left:16px;right:16px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
-.brand h1{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;letter-spacing:3px;text-transform:uppercase;background:linear-gradient(90deg,#7b8cff,#5dca7b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:3px}
-.brand p{font-size:10px;color:rgba(200,200,210,0.4);font-family:'JetBrains Mono',monospace;letter-spacing:0.5px}
-.stats{display:flex;gap:24px;flex-wrap:wrap}
-.st{text-align:center}
-.st b{display:block;font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:300;color:#e8e8ff}
-.st small{font-size:9px;text-transform:uppercase;letter-spacing:2px;color:rgba(200,200,210,0.35)}
-.bot{bottom:16px;left:16px;right:16px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
-.cg{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.sl{display:flex;align-items:center;gap:6px}
-.sl label{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(200,200,210,0.45);text-transform:uppercase;letter-spacing:1px;white-space:nowrap}
-.sl input[type=range]{-webkit-appearance:none;width:90px;height:2px;background:rgba(123,140,255,0.25);border-radius:1px;outline:none}
-.sl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:10px;border-radius:50%;background:#7b8cff;cursor:pointer;box-shadow:0 0 8px rgba(123,140,255,0.5)}
-.sl em{font-family:'JetBrains Mono',monospace;font-size:10px;color:#a0adff;min-width:22px;text-align:right;font-style:normal}
-.b{background:transparent;border:1px solid rgba(123,140,255,0.15);color:rgba(160,173,255,0.6);font-family:'JetBrains Mono',monospace;font-size:10px;padding:7px 14px;border-radius:8px;cursor:pointer;transition:all 0.25s;letter-spacing:0.5px}
-.b:hover{background:rgba(123,140,255,0.1);border-color:rgba(123,140,255,0.35);color:#c8d0ff}
-.b.on{background:rgba(123,140,255,0.18);border-color:rgba(123,140,255,0.5);color:#fff;box-shadow:0 0 12px rgba(123,140,255,0.15)}
-.leg{bottom:70px;right:16px}
-.li{display:flex;align-items:center;gap:8px;margin-bottom:5px}
-.ld{width:10px;height:10px;border-radius:50%;box-shadow:0 0 6px currentColor}
-.lt{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(200,200,210,0.4);letter-spacing:0.5px}
-.inf{top:76px;right:16px;max-width:240px;font-size:11px;line-height:1.7;color:rgba(200,200,210,0.5);font-family:'JetBrains Mono',monospace;transition:opacity 0.3s;opacity:0;pointer-events:none !important}
-.inf.show{opacity:1}
-@keyframes pls{0%,100%{box-shadow:0 0 4px #5dca7b}50%{box-shadow:0 0 12px #5dca7b,0 0 20px rgba(93,202,123,0.3)}}
-.live{width:7px;height:7px;border-radius:50%;background:#5dca7b;display:inline-block;margin-right:8px;animation:pls 1.5s ease-in-out infinite}
-.mode-label{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'JetBrains Mono',monospace;font-size:48px;font-weight:300;color:rgba(123,140,255,0);letter-spacing:8px;z-index:5;pointer-events:none;transition:color 0.5s;text-transform:uppercase}
+.ui>*{pointer-events:auto}
+.P{background:rgba(8,8,20,0.9);backdrop-filter:blur(20px);border:1px solid rgba(123,140,255,0.1);border-radius:12px;padding:12px 16px}
+.top{top:12px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.brand h1{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;letter-spacing:3px;text-transform:uppercase;background:linear-gradient(90deg,#7b8cff,#5dca7b);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.brand p{font-size:9px;color:rgba(200,200,210,0.35);font-family:'JetBrains Mono',monospace;letter-spacing:0.5px;margin-top:2px}
+.sts{display:flex;gap:16px;flex-wrap:wrap}
+.s{text-align:center}
+.s b{display:block;font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:300;color:#e8e8ff}
+.s small{font-size:8px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(200,200,210,0.3)}
+.bot{bottom:12px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.cg{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.sl{display:flex;align-items:center;gap:5px}
+.sl label{font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,200,210,0.4);text-transform:uppercase;letter-spacing:1px;white-space:nowrap}
+.sl input[type=range]{-webkit-appearance:none;width:70px;height:2px;background:rgba(123,140,255,0.2);border-radius:1px;outline:none}
+.sl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:9px;height:9px;border-radius:50%;background:#7b8cff;cursor:pointer;box-shadow:0 0 6px rgba(123,140,255,0.4)}
+.sl em{font-family:'JetBrains Mono',monospace;font-size:9px;color:#a0adff;min-width:18px;text-align:right;font-style:normal}
+.b{background:transparent;border:1px solid rgba(123,140,255,0.12);color:rgba(160,173,255,0.5);font-family:'JetBrains Mono',monospace;font-size:9px;padding:6px 10px;border-radius:7px;cursor:pointer;transition:all 0.2s;letter-spacing:0.3px}
+.b:hover{background:rgba(123,140,255,0.08);border-color:rgba(123,140,255,0.3);color:#c8d0ff}
+.b.on{background:rgba(123,140,255,0.15);border-color:rgba(123,140,255,0.45);color:#fff;box-shadow:0 0 10px rgba(123,140,255,0.12)}
+.leg{bottom:62px;right:12px;font-size:0}
+.li{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.ld{width:8px;height:8px;border-radius:50%;box-shadow:0 0 5px currentColor}
+.lt{font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,200,210,0.4);letter-spacing:0.3px}
+.mass-panel{top:70px;left:12px;width:200px;transition:opacity 0.3s}
+.mass-panel.hide{opacity:0;pointer-events:none !important}
+.mass-panel h3{font-family:'JetBrains Mono',monospace;font-size:10px;color:#7b8cff;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.mbar{margin-bottom:6px}
+.mbar-label{font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;justify-content:space-between;margin-bottom:2px}
+.mbar-track{height:4px;background:rgba(255,255,255,0.05);border-radius:2px;overflow:hidden}
+.mbar-fill{height:100%;border-radius:2px;transition:width 0.5s}
+.mbar-label span:first-child{color:rgba(200,200,210,0.5)}
+.mbar-label span:last-child{color:rgba(200,200,210,0.7)}
+.fiber-panel{top:70px;right:12px;width:180px;transition:opacity 0.3s}
+.fiber-panel.hide{opacity:0;pointer-events:none !important}
+.fiber-panel h3{font-family:'JetBrains Mono',monospace;font-size:10px;color:#7b8cff;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.fiber-panel canvas{border-radius:8px;border:1px solid rgba(123,140,255,0.08)}
+.bell-panel{top:240px;right:12px;width:180px;transition:opacity 0.3s}
+.bell-panel.hide{opacity:0;pointer-events:none !important}
+.bell-panel h3{font-family:'JetBrains Mono',monospace;font-size:10px;color:#7b8cff;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.bell-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:300;text-align:center;margin:4px 0}
+.bell-sub{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(200,200,210,0.4);text-align:center}
+@keyframes pls{0%,100%{box-shadow:0 0 4px #5dca7b}50%{box-shadow:0 0 10px #5dca7b}}
+.live{width:6px;height:6px;border-radius:50%;background:#5dca7b;display:inline-block;margin-right:6px;animation:pls 1.5s ease-in-out infinite}
+.mode-label{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'JetBrains Mono',monospace;font-size:42px;font-weight:300;color:rgba(123,140,255,0);letter-spacing:8px;z-index:5;pointer-events:none;transition:color 0.5s;text-transform:uppercase}
 .mode-label.show{color:rgba(123,140,255,0.2)}
+.decoherence-bar{position:fixed;top:56px;left:12px;right:12px;z-index:8;pointer-events:none}
+.deco-track{height:3px;background:rgba(255,255,255,0.03);border-radius:2px;overflow:hidden}
+.deco-fill{height:100%;background:linear-gradient(90deg,#aa66ff,#5dca7b);border-radius:2px;transition:width 0.3s;width:0%}
+.deco-label{font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,200,210,0.3);margin-top:2px;letter-spacing:1px}
 </style>
 </head>
 <body>
 <div id="mlab" class="mode-label"></div>
+<div class="decoherence-bar"><div class="deco-track"><div class="deco-fill" id="decoFill"></div></div><div class="deco-label">K-sector decoherence: <span id="decoVal">0%</span></div></div>
 <div class="ui top">
-  <div class="panel brand"><h1><span class="live"></span>Discrete spacetime</h1><p>Poisson causal set &middot; 2+1d &middot; continuous growth</p></div>
-  <div class="panel stats">
-    <div class="st"><b id="sN">0</b><small>Atoms</small></div>
-    <div class="st"><b id="sL">0</b><small>Links</small></div>
-    <div class="st"><b id="sC">0</b><small>Chain</small></div>
-    <div class="st"><b id="sT">0.0</b><small>Time</small></div>
-    <div class="st"><b id="sR">0.0</b><small>Links/atom</small></div>
+  <div class="P brand"><h1><span class="live"></span>Unified framework</h1><p>7 inputs &middot; 34 theorems &middot; causal set &times; SU(3)&times;SU(2)&times;U(1) fiber</p></div>
+  <div class="P sts">
+    <div class="s"><b id="sN">0</b><small>Atoms</small></div>
+    <div class="s"><b id="sL">0</b><small>Links</small></div>
+    <div class="s"><b id="sC">0</b><small>Chain</small></div>
+    <div class="s"><b id="sT">0.0</b><small>Time</small></div>
+    <div class="s"><b id="sMc">—</b><small>m_c/m_t</small></div>
+    <div class="s"><b id="sTb">—</b><small>m_t/m_b</small></div>
+  </div>
+</div>
+<div class="ui mass-panel P" id="massPanel">
+  <h3>Mass hierarchy (K/P)</h3>
+  <div class="mbar"><div class="mbar-label"><span>gen 3 (top)</span><span id="mg3">0</span></div><div class="mbar-track"><div class="mbar-fill" id="mb3" style="width:0%;background:#ff4466"></div></div></div>
+  <div class="mbar"><div class="mbar-label"><span>gen 2 (charm)</span><span id="mg2">0</span></div><div class="mbar-track"><div class="mbar-fill" id="mb2" style="width:0%;background:#ffaa22"></div></div></div>
+  <div class="mbar"><div class="mbar-label"><span>gen 1 (up)</span><span id="mg1">0</span></div><div class="mbar-track"><div class="mbar-fill" id="mb1" style="width:0%;background:#5dca7b"></div></div></div>
+  <div style="margin-top:10px;border-top:1px solid rgba(123,140,255,0.08);padding-top:8px">
+    <div class="mbar"><div class="mbar-label"><span>bottom (P-sector)</span><span id="mgb">0</span></div><div class="mbar-track"><div class="mbar-fill" id="mbb" style="width:0%;background:#aa66ff"></div></div></div>
+  </div>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,200,210,0.3);margin-top:8px">
+    Product rule: <span id="prodRule" style="color:#a0adff">—</span><br>
+    Derived: 2&radic;2/3 &asymp; 0.943
+  </div>
+</div>
+<div class="ui fiber-panel P" id="fiberPanel">
+  <h3>SU(3) fiber &mdash; c_eff</h3>
+  <canvas id="fiberCv" width="160" height="160"></canvas>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,200,210,0.25);margin-top:4px">
+    Source direction &phi; (red)<br>c_eff concentration (white)
+  </div>
+</div>
+<div class="ui bell-panel P hide" id="bellPanel">
+  <h3>Bell nonlocality</h3>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(200,200,210,0.5);line-height:1.5">
+    <span style="color:#ffdd44">&#9679;</span> Spacelike pair (yellow)<br>
+    <span style="color:#ff8800">&#9679;</span> Shared ancestors (orange)<br>
+    <span style="color:#ffdd44">---</span> Spacelike gap (dashed)<br>
+    <span style="color:#ff8800">&#9474;</span> Causal ancestry paths
+  </div>
+  <div style="margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,200,210,0.35)">
+    Correlated without signaling.<br>
+    Shared causal past constrains<br>
+    both measurements via the fiber.<br>
+    Derived: S&sup2; = 8 &gt; 4 (Thm 23)
+  </div>
+  <div style="margin-top:6px">
+    <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(200,200,210,0.3)">Shared ancestors: </span>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#ff8800" id="bellAnc">0</span>
   </div>
 </div>
 <div class="ui bot">
-  <div class="panel cg">
+  <div class="P cg">
     <div class="sl"><label>Speed</label><input type="range" id="rRate" min="1" max="30" value="8"><em id="vRate">8</em></div>
-    <div class="sl"><label>Link glow</label><input type="range" id="rLink" min="0" max="100" value="50"><em id="vLink">50</em></div>
-    <div class="sl"><label>Atom size</label><input type="range" id="rSize" min="1" max="10" value="4"><em id="vSize">4</em></div>
+    <div class="sl"><label>Links</label><input type="range" id="rLink" min="0" max="100" value="40"><em id="vLink">40</em></div>
+    <div class="sl"><label>&beta;</label><input type="range" id="rBeta" min="1" max="12" value="6"><em id="vBeta">6</em></div>
   </div>
-  <div class="panel cg">
+  <div class="P cg">
     <button class="b on" id="bLinks">Links</button>
+    <button class="b on" id="bGen">Generations</button>
     <button class="b" id="bChain">Chain</button>
     <button class="b" id="bCones">Cones</button>
     <button class="b on" id="bTrail">Trail</button>
     <button class="b" id="bPulse">Pulse</button>
+    <button class="b" id="bBell">Bell test</button>
     <button class="b" id="bBang">Big bang</button>
     <button class="b" id="bPause">Pause</button>
     <button class="b" id="bReset">Reset</button>
-    <button class="b" id="bInfo">Info</button>
   </div>
 </div>
-<div class="ui leg panel">
-  <div class="li"><div class="ld" style="color:#6e80ff;background:#6e80ff"></div><div class="lt">Spacetime atom</div></div>
-  <div class="li"><div class="ld" style="color:#00ff88;background:#00ff88"></div><div class="lt">Newly born</div></div>
-  <div class="li"><div class="ld" style="color:#ff4466;background:#ff4466"></div><div class="lt">Longest chain</div></div>
-  <div class="li"><div class="ld" style="color:#ffaa22;background:#ffaa22"></div><div class="lt">Birth trail</div></div>
-  <div class="li"><div class="ld" style="color:#aa66ff;background:#aa66ff"></div><div class="lt">Light cone</div></div>
-  <div class="li"><div class="ld" style="color:#ffdd44;background:#ffdd44"></div><div class="lt">Causal pulse</div></div>
-</div>
-<div class="ui inf panel" id="inf">
-  Each dot is one Planck-scale spacetime atom, born randomly (Poisson process) to preserve Lorentz invariance.<br><br>
-  Two atoms are linked if one is in the other's causal past with nothing between them. Time flows upward.<br><br>
-  The longest chain = discrete proper time along a geodesic. Light cones show causal horizons.<br><br>
-  <span style="color:#7b8cff">Pulse</span> sends a wavefront through causal links.<br>
-  <span style="color:#7b8cff">Big bang</span> replays creation from element 1.<br><br>
-  Drag to orbit. Scroll to zoom. Pinch on mobile.<br><br>
-  This is spacetime at 10<sup style="color:#7b8cff">-35</sup> meters.
+<div class="ui leg P">
+  <div class="li"><div class="ld" style="color:#ff4466;background:#ff4466"></div><div class="lt">Gen 3 / top (K-aligned)</div></div>
+  <div class="li"><div class="ld" style="color:#ffaa22;background:#ffaa22"></div><div class="lt">Gen 2 / charm</div></div>
+  <div class="li"><div class="ld" style="color:#5dca7b;background:#5dca7b"></div><div class="lt">Gen 1 / up (P-sector)</div></div>
+  <div class="li"><div class="ld" style="color:#aa66ff;background:#aa66ff"></div><div class="lt">Down-type (Higgs P)</div></div>
+  <div class="li"><div class="ld" style="color:#ffdd44;background:#ffdd44"></div><div class="lt">Bell-correlated pair</div></div>
+  <div class="li"><div class="ld" style="color:#6e80ff;background:#6e80ff"></div><div class="lt">Default atom</div></div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, 0.1, 500);
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(innerWidth, innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-renderer.setClearColor(0x050510);
-document.body.prepend(renderer.domElement);
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,0.1,500);
+const R=new THREE.WebGLRenderer({antialias:true});
+R.setSize(innerWidth,innerHeight);R.setPixelRatio(Math.min(devicePixelRatio,2));R.setClearColor(0x050510);
+document.body.prepend(R.domElement);
 
-let drag=false, pm={x:0,y:0}, cTh=0.3, cPh=1.0, cD=18, cTgt=new THREE.Vector3(0,2,0);
-function updCam(){
-  camera.position.set(
-    cTgt.x+cD*Math.sin(cPh)*Math.sin(cTh),
-    cTgt.y+cD*Math.cos(cPh),
-    cTgt.z+cD*Math.sin(cPh)*Math.cos(cTh));
-  camera.lookAt(cTgt);
-}
-updCam();
-renderer.domElement.addEventListener('pointerdown',e=>{drag=true;pm={x:e.clientX,y:e.clientY}});
+let drag=false,pm={x:0,y:0},cTh=0.3,cPh=1.0,cD=18,cTgt=new THREE.Vector3(0,2,0);
+function uC(){camera.position.set(cTgt.x+cD*Math.sin(cPh)*Math.sin(cTh),cTgt.y+cD*Math.cos(cPh),cTgt.z+cD*Math.sin(cPh)*Math.cos(cTh));camera.lookAt(cTgt)}
+uC();
+R.domElement.addEventListener('pointerdown',e=>{drag=true;pm={x:e.clientX,y:e.clientY}});
 window.addEventListener('pointerup',()=>drag=false);
-window.addEventListener('pointermove',e=>{
-  if(!drag)return;
-  cTh+=(e.clientX-pm.x)*0.006;
-  cPh=Math.max(0.15,Math.min(Math.PI-0.15,cPh-(e.clientY-pm.y)*0.006));
-  pm={x:e.clientX,y:e.clientY};updCam();
-});
-renderer.domElement.addEventListener('wheel',e=>{cD=Math.max(4,Math.min(50,cD+e.deltaY*0.015));updCam()},{passive:true});
+window.addEventListener('pointermove',e=>{if(!drag)return;cTh+=(e.clientX-pm.x)*0.006;cPh=Math.max(0.15,Math.min(Math.PI-0.15,cPh-(e.clientY-pm.y)*0.006));pm={x:e.clientX,y:e.clientY};uC()});
+R.domElement.addEventListener('wheel',e=>{cD=Math.max(4,Math.min(50,cD+e.deltaY*0.015));uC()},{passive:true});
 
-const SR=6, MX=4000;
-let pts=[], lnk=[], chn=[], maxT=0;
-let sLinks=true, sChain=false, sCones=false, sTrail=true, sPulse=false, paused=false;
-let bRate=8, lkOp=0.5, ptSz=0.04;
-let bigBang=false, bbIdx=0, bbBornTimes=[];
+(function(){const g=new THREE.BufferGeometry(),v=[];for(let i=0;i<3000;i++)v.push((Math.random()-0.5)*200,(Math.random()-0.5)*200,(Math.random()-0.5)*200);g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));scene.add(new THREE.Points(g,new THREE.PointsMaterial({color:0x222244,size:0.1,transparent:true,opacity:0.5})))})();
+scene.add(new THREE.GridHelper(30,30,0x0e0e28,0x08081a)).position.y=-0.5;
 
-function visCount(){ return bigBang ? bbIdx : pts.length; }
+const SR=6,MX=3000;
+let pts=[],lnk=[],chn=[],maxT=0;
+let sLinks=true,sChain=false,sCones=false,sTrail=true,sGen=true,sBell=false;
+let bRate=8,lkOp=0.4,beta=6,paused=false;
+let bigBang=false,bbIdx=0,bbBorn=[];
 
-(function stars(){
-  const g=new THREE.BufferGeometry(), v=[];
-  for(let i=0;i<4000;i++) v.push((Math.random()-0.5)*200,(Math.random()-0.5)*200,(Math.random()-0.5)*200);
-  g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));
-  scene.add(new THREE.Points(g,new THREE.PointsMaterial({color:0x334466,size:0.12,transparent:true,opacity:0.6})));
-})();
-const gridH=new THREE.GridHelper(30,30,0x111133,0x0a0a22);
-gridH.position.y=-0.5; scene.add(gridH);
+function vc(){return bigBang?bbIdx:pts.length}
 
-function P(p){return new THREE.Vector3(p.x, p.t*0.7, p.z)}
+function P(p){return new THREE.Vector3(p.x,p.t*0.7,p.z)}
 
-const ptGeom=new THREE.SphereGeometry(1,10,8);
-const ptMat=new THREE.MeshBasicMaterial({color:0xffffff});
-const ptMesh=new THREE.InstancedMesh(ptGeom, ptMat, MX);
-ptMesh.count=0;
-ptMesh.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(MX*3),3);
-scene.add(ptMesh);
-
-let linkGrp=new THREE.Group(); scene.add(linkGrp);
-let chainGrp=new THREE.Group(); scene.add(chainGrp);
-let trailGrp=new THREE.Group(); scene.add(trailGrp);
-let coneGrp=new THREE.Group(); scene.add(coneGrp);
-
-let glowSprite;
-(function makeGlow(){
-  const c=document.createElement('canvas');c.width=64;c.height=64;
-  const cx=c.getContext('2d');
-  const gr=cx.createRadialGradient(32,32,0,32,32,32);
-  gr.addColorStop(0,'rgba(0,255,136,1)');
-  gr.addColorStop(0.2,'rgba(0,255,136,0.6)');
-  gr.addColorStop(0.5,'rgba(0,255,136,0.15)');
-  gr.addColorStop(1,'rgba(0,255,136,0)');
-  cx.fillStyle=gr;cx.fillRect(0,0,64,64);
-  const tex=new THREE.CanvasTexture(c);
-  glowSprite=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,blending:THREE.AdditiveBlending}));
-  glowSprite.scale.set(2,2,1);
-  glowSprite.visible=false;
-  scene.add(glowSprite);
-})();
-
-function flashGlow(p){
-  glowSprite.position.copy(P(p));
-  glowSprite.visible=true;
-  glowSprite.scale.set(3,3,1);
-  glowSprite.material.opacity=1;
+function randSU3(b){
+  const s=1/b;
+  let m=[[1,0,0],[0,1,0],[0,0,1]];
+  for(let g=0;g<8;g++){
+    const a=(Math.random()-0.5)*s;
+    const r=Math.floor(Math.random()*3),c=Math.floor(Math.random()*3);
+    if(r!==c){m[r][c]+=a;m[c][r]-=a}
+  }
+  return m;
 }
+function applyM(m,v){return[m[0][0]*v[0]+m[0][1]*v[1]+m[0][2]*v[2],m[1][0]*v[0]+m[1][1]*v[1]+m[1][2]*v[2],m[2][0]*v[0]+m[2][1]*v[1]+m[2][2]*v[2]]}
+function norm3(v){const n=Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);return n>0?[v[0]/n,v[1]/n,v[2]/n]:[1,0,0]}
+function dot3(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]}
+
+const phi=[1,0,0];
+const s1=[1,0,0],s2=[0,1,0],s3=[0,0,1];
 
 function addEl(){
   if(pts.length>=MX)return;
   maxT+=0.015+Math.random()*0.025;
-  const p={t:maxT,x:(Math.random()-0.5)*SR*2,z:(Math.random()-0.5)*SR*2,born:performance.now(),i:pts.length};
+  const genId=Math.floor(Math.random()*3);
+  const p={t:maxT,x:(Math.random()-0.5)*SR*2,z:(Math.random()-0.5)*SR*2,born:performance.now(),i:pts.length,cEff:[0,0,0],nChains:0,gen:genId,kStrength:0,massScale:0.3};
   pts.push(p);
-  const lo=Math.max(0,pts.length-500);
+  const lo=Math.max(0,pts.length-400);
   for(let i=pts.length-2;i>=lo;i--){
-    const o=pts[i];
-    const dt=p.t-o.t,dx=Math.hypot(p.x-o.x,p.z-o.z);
+    const o=pts[i],dt=p.t-o.t,dx=Math.hypot(p.x-o.x,p.z-o.z);
     if(dt>dx&&dt>0){
       let isL=true;
-      for(let k=i+1;k<pts.length-1;k++){
-        const m=pts[k];
-        if((m.t-o.t)>Math.hypot(m.x-o.x,m.z-o.z)&&(p.t-m.t)>Math.hypot(p.x-m.x,p.z-m.z)){isL=false;break}
+      for(let k=i+1;k<pts.length-1;k++){const m=pts[k];if((m.t-o.t)>Math.hypot(m.x-o.x,m.z-o.z)&&(p.t-m.t)>Math.hypot(p.x-m.x,p.z-m.z)){isL=false;break}}
+      if(isL){
+        lnk.push([i,pts.length-1]);
+        const U=randSU3(beta);
+        const parentC=o.nChains>0?norm3(o.cEff):phi;
+        const rotated=applyM(U,parentC);
+        p.cEff[0]+=rotated[0];p.cEff[1]+=rotated[1];p.cEff[2]+=rotated[2];
+        p.nChains++;
       }
-      if(isL) lnk.push([i,pts.length-1]);
     }
   }
-  flashGlow(p);
+  if(p.nChains===0){p.cEff=[phi[0],phi[1],phi[2]];p.nChains=1}
+  const cn=norm3(p.cEff);
+  const sections=[[1,0,0],[0,1,0],[0,0,1]];
+  const proj=[Math.abs(dot3(cn,sections[0])),Math.abs(dot3(cn,sections[1])),Math.abs(dot3(cn,sections[2]))];
+  const sorted=[...proj].sort((a,b)=>b-a);
+  const genProj=[sorted[0],sorted[1],sorted[2]];
+  p.kStrength=genProj[p.gen];
+  p.massScale=genProj[p.gen]/Math.max(0.01,genProj[0]);
+  glS.position.copy(P(p));glS.visible=true;glS.scale.set(2.5,2.5,1);glS.material.opacity=1;
 }
 
+const ptG=new THREE.SphereGeometry(1,8,6);
+const ptM=new THREE.InstancedMesh(ptG,new THREE.MeshBasicMaterial({color:0xffffff}),MX);
+ptM.count=0;ptM.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(MX*3),3);scene.add(ptM);
+
+let linkGrp=new THREE.Group();scene.add(linkGrp);
+let chainGrp=new THREE.Group();scene.add(chainGrp);
+let trailGrp=new THREE.Group();scene.add(trailGrp);
+let coneGrp=new THREE.Group();scene.add(coneGrp);
+
+let glS;
+(function(){const c=document.createElement('canvas');c.width=64;c.height=64;const x=c.getContext('2d');const g=x.createRadialGradient(32,32,0,32,32,32);g.addColorStop(0,'rgba(0,255,136,1)');g.addColorStop(0.3,'rgba(0,255,136,0.4)');g.addColorStop(1,'rgba(0,255,136,0)');x.fillStyle=g;x.fillRect(0,0,64,64);glS=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,blending:THREE.AdditiveBlending}));glS.scale.set(2,2,1);glS.visible=false;scene.add(glS)})();
+
+const genCols=[new THREE.Color(0x5dca7b),new THREE.Color(0xffaa22),new THREE.Color(0xff4466)];
+const cDefault=new THREE.Color(0x6e80ff);
+const cPulseC=new THREE.Color(0xffdd44);
+const cBellC=new THREE.Color(0xffdd44);
+const cDownType=new THREE.Color(0xaa66ff);
 const dm=new THREE.Object3D();
-const cNew=new THREE.Color(0x00ff88);
-const cNorm=new THREE.Color(0x6e80ff);
-const cChainCol=new THREE.Color(0xff4466);
-const cPulseCol=new THREE.Color(0xffdd44);
 
 function updPts(){
-  const vc=visCount();
-  ptMesh.count=vc;
-  const now=performance.now();
-  for(let i=0;i<vc;i++){
-    const p=pts[i];
-    dm.position.copy(P(p));
-    const bornTime = bigBang ? (bbBornTimes[i]||now) : p.born;
-    const age=(now-bornTime)/1000;
-    const sc=ptSz*(age<0.8?1+(0.8-age)*4:1);
-    dm.scale.setScalar(sc);
-    dm.updateMatrix();
-    ptMesh.setMatrixAt(i,dm.matrix);
-    const isNew=age<1.5;
-    const isC=sChain&&chn.includes(i);
-    const isPl=pulseActive.has(i);
-    const col=isPl?cPulseCol:isNew?cNew:isC?cChainCol:cNorm;
-    ptMesh.instanceColor.setXYZ(i,col.r,col.g,col.b);
+  const n=vc();ptM.count=n;const now=performance.now();
+  for(let i=0;i<n;i++){
+    const p=pts[i];dm.position.copy(P(p));
+    const bt=bigBang?(bbBorn[i]||now):p.born;
+    const age=(now-bt)/1000;
+    const birthPop=age<0.6?1+(0.6-age)*5:1;
+    const massFactor=sGen?Math.max(0.3,p.massScale):1;
+    const sc=0.04*birthPop*massFactor;
+    dm.scale.setScalar(sc);dm.updateMatrix();ptM.setMatrixAt(i,dm.matrix);
+    let col;
+    if(bellActive.has(i)){col=cBellC}
+    else if(bellAncestors.has(i)){col=new THREE.Color(0xff8800)}
+    else if(pulseActive.has(i)){col=cPulseC}
+    else if(age<1.0){col=new THREE.Color(0x00ff88)}
+    else if(sGen){col=genCols[p.gen]}
+    else{col=cDefault}
+    ptM.instanceColor.setXYZ(i,col.r,col.g,col.b);
   }
-  ptMesh.instanceMatrix.needsUpdate=true;
-  ptMesh.instanceColor.needsUpdate=true;
+  ptM.instanceMatrix.needsUpdate=true;ptM.instanceColor.needsUpdate=true;
 }
 
 function compChain(){
-  const vc=visCount();
-  if(vc<2)return;
-  const dp=new Int32Array(vc).fill(1);
-  const pr=new Int32Array(vc).fill(-1);
-  const adj=new Array(vc);
-  for(let i=0;i<vc;i++) adj[i]=[];
-  for(const[a,b]of lnk){
-    if(a<vc&&b<vc) adj[a].push(b);
-  }
-  for(let i=0;i<vc;i++){
-    for(const j of adj[i]){
-      if(dp[i]+1>dp[j]){dp[j]=dp[i]+1;pr[j]=i}
-    }
-  }
-  let best=0;
-  for(let i=1;i<vc;i++) if(dp[i]>dp[best])best=i;
-  chn=[];
-  let c=best;
-  while(c!==-1){chn.unshift(c);c=pr[c]}
+  const n=vc();if(n<2)return;
+  const dp=new Int32Array(n).fill(1),pr=new Int32Array(n).fill(-1);
+  const adj=Array.from({length:n},()=>[]);
+  for(const[a,b]of lnk)if(a<n&&b<n)adj[a].push(b);
+  for(let i=0;i<n;i++)for(const j of adj[i])if(dp[i]+1>dp[j]){dp[j]=dp[i]+1;pr[j]=i}
+  let best=0;for(let i=1;i<n;i++)if(dp[i]>dp[best])best=i;
+  chn=[];let c=best;while(c!==-1){chn.unshift(c);c=pr[c]}
 }
 
 function rebuildLinks(){
-  while(linkGrp.children.length) linkGrp.remove(linkGrp.children[0]);
-  if(!sLinks||lnk.length===0)return;
-  const vc=visCount();
-  const verts=[], cols=[];
-  let count=0;
-  for(let k=lnk.length-1;k>=0&&count<3000;k--){
-    const[i,j]=lnk[k];
-    if(i<vc&&j<vc){
-      const a=P(pts[i]),b=P(pts[j]);
-      verts.push(a.x,a.y,a.z,b.x,b.y,b.z);
-      cols.push(0.43,0.5,1, 0.43,0.5,1);
-      count++;
+  while(linkGrp.children.length)linkGrp.remove(linkGrp.children[0]);
+  if(!sLinks)return;const n=vc();const v=[],cl=[];let ct=0;
+  for(let k=lnk.length-1;k>=0&&ct<2500;k--){
+    const[i,j]=lnk[k];if(i<n&&j<n){
+      const a=P(pts[i]),b=P(pts[j]);v.push(a.x,a.y,a.z,b.x,b.y,b.z);
+      if(sGen){
+        const gi=pts[i].gen,gj=pts[j].gen;
+        const ci=genCols[gi]||cDefault,cj=genCols[gj]||cDefault;
+        cl.push(ci.r,ci.g,ci.b,cj.r,cj.g,cj.b);
+      }else{cl.push(0.43,0.5,1,0.43,0.5,1)}
+      ct++;
     }
   }
-  if(verts.length===0)return;
-  const g=new THREE.BufferGeometry();
-  g.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
-  g.setAttribute('color',new THREE.Float32BufferAttribute(cols,3));
-  linkGrp.add(new THREE.LineSegments(g,new THREE.LineBasicMaterial({vertexColors:true,transparent:true,opacity:lkOp*0.5,blending:THREE.AdditiveBlending})));
+  if(v.length===0)return;
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));
+  g.setAttribute('color',new THREE.Float32BufferAttribute(cl,3));
+  linkGrp.add(new THREE.LineSegments(g,new THREE.LineBasicMaterial({vertexColors:true,transparent:true,opacity:lkOp*0.4,blending:THREE.AdditiveBlending})));
 }
 
 function rebuildChain(){
-  while(chainGrp.children.length) chainGrp.remove(chainGrp.children[0]);
+  while(chainGrp.children.length)chainGrp.remove(chainGrp.children[0]);
   if(!sChain||chn.length<2)return;
-  const verts=chn.map(i=>P(pts[i]));
-  const g=new THREE.BufferGeometry().setFromPoints(verts);
+  const v=chn.map(i=>P(pts[i]));
+  const g=new THREE.BufferGeometry().setFromPoints(v);
   chainGrp.add(new THREE.Line(g,new THREE.LineBasicMaterial({color:0xff4466,transparent:true,opacity:0.9})));
-  chainGrp.add(new THREE.Line(g.clone(),new THREE.LineBasicMaterial({color:0xff4466,transparent:true,opacity:0.35,blending:THREE.AdditiveBlending})));
-  for(const idx of chn){
-    const sp=new THREE.Sprite(new THREE.SpriteMaterial({color:0xff4466,transparent:true,opacity:0.25,blending:THREE.AdditiveBlending}));
-    sp.position.copy(P(pts[idx]));
-    sp.scale.set(0.3,0.3,1);
-    chainGrp.add(sp);
-  }
+  chainGrp.add(new THREE.Line(g.clone(),new THREE.LineBasicMaterial({color:0xff4466,transparent:true,opacity:0.3,blending:THREE.AdditiveBlending})));
 }
 
 function rebuildTrail(){
-  while(trailGrp.children.length) trailGrp.remove(trailGrp.children[0]);
-  if(!sTrail)return;
-  const vc=visCount();
-  if(vc<3)return;
-  const start=Math.max(0,vc-150);
-  const rec=pts.slice(start,vc);
-  const verts=rec.map(p=>P(p));
-  const g=new THREE.BufferGeometry().setFromPoints(verts);
-  const cols=[];
-  for(let i=0;i<rec.length;i++){
-    const t=i/rec.length;
-    cols.push(t,0.67*t,0.13*t);
-  }
-  g.setAttribute('color',new THREE.Float32BufferAttribute(cols,3));
-  trailGrp.add(new THREE.Line(g,new THREE.LineBasicMaterial({vertexColors:true,transparent:true,opacity:0.8,blending:THREE.AdditiveBlending})));
+  while(trailGrp.children.length)trailGrp.remove(trailGrp.children[0]);
+  if(!sTrail)return;const n=vc();if(n<3)return;
+  const st=Math.max(0,n-120),rec=pts.slice(st,n);
+  const v=rec.map(p=>P(p)),cl=[];
+  for(let i=0;i<rec.length;i++){const t=i/rec.length;cl.push(t,0.6*t,0.1*t)}
+  const g=new THREE.BufferGeometry().setFromPoints(v);
+  g.setAttribute('color',new THREE.Float32BufferAttribute(cl,3));
+  trailGrp.add(new THREE.Line(g,new THREE.LineBasicMaterial({vertexColors:true,transparent:true,opacity:0.7,blending:THREE.AdditiveBlending})));
 }
 
 function rebuildCones(){
-  while(coneGrp.children.length) coneGrp.remove(coneGrp.children[0]);
-  const vc=visCount();
-  if(!sCones||vc===0)return;
-  const last=pts[vc-1];
-  const p=P(last);
-  const h=4,r=h;
-  const mat=new THREE.MeshBasicMaterial({color:0xaa66ff,transparent:true,opacity:0.07,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending});
-  const wmat=new THREE.MeshBasicMaterial({color:0xaa66ff,wireframe:true,transparent:true,opacity:0.15});
+  while(coneGrp.children.length)coneGrp.remove(coneGrp.children[0]);
+  const n=vc();if(!sCones||n===0)return;const p=P(pts[n-1]),h=4,r=h;
+  const mat=new THREE.MeshBasicMaterial({color:0xaa66ff,transparent:true,opacity:0.06,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending});
+  const wm=new THREE.MeshBasicMaterial({color:0xaa66ff,wireframe:true,transparent:true,opacity:0.12});
   const geo=new THREE.ConeGeometry(r,h,4,1,true);
-  const past=new THREE.Mesh(geo,mat);
-  past.position.set(p.x,p.y-h/2,p.z);
-  past.rotation.y=Math.PI/4;
-  coneGrp.add(past);
-  const wf1=new THREE.Mesh(new THREE.ConeGeometry(r,h,4,1,false),wmat);
-  wf1.position.copy(past.position);wf1.rotation.y=Math.PI/4;
-  coneGrp.add(wf1);
-  const fut=new THREE.Mesh(geo.clone(),mat.clone());
-  fut.rotation.set(Math.PI,Math.PI/4,0);
-  fut.position.set(p.x,p.y+h/2,p.z);
-  coneGrp.add(fut);
-  const wf2=new THREE.Mesh(new THREE.ConeGeometry(r,h,4,1,false),wmat.clone());
-  wf2.position.copy(fut.position);wf2.rotation.set(Math.PI,Math.PI/4,0);
-  coneGrp.add(wf2);
+  const pa=new THREE.Mesh(geo,mat);pa.position.set(p.x,p.y-h/2,p.z);pa.rotation.y=Math.PI/4;coneGrp.add(pa);
+  const wf1=new THREE.Mesh(new THREE.ConeGeometry(r,h,4,1,false),wm);wf1.position.set(p.x,p.y-h/2,p.z);wf1.rotation.y=Math.PI/4;coneGrp.add(wf1);
+  const fu=new THREE.Mesh(geo.clone(),mat.clone());fu.rotation.set(Math.PI,Math.PI/4,0);fu.position.set(p.x,p.y+h/2,p.z);coneGrp.add(fu);
+  const wf2=new THREE.Mesh(new THREE.ConeGeometry(r,h,4,1,false),wm.clone());wf2.rotation.set(Math.PI,Math.PI/4,0);wf2.position.set(p.x,p.y+h/2,p.z);coneGrp.add(wf2);
 }
 
-let pulseActive=new Set(), pulseFront=new Set(), pulseStep=0;
-function startPulse(){
-  const vc=visCount();
-  if(vc===0)return;
-  pulseActive=new Set([0]);
-  pulseFront=new Set([0]);
-  pulseStep=0;sPulse=true;
-}
-function stepPulse(){
-  if(!sPulse||pulseFront.size===0){sPulse=false;return}
-  const vc=visCount();
-  const next=new Set();
-  for(const[a,b]of lnk){
-    if(a<vc&&b<vc&&pulseFront.has(a)&&!pulseActive.has(b)){next.add(b);pulseActive.add(b)}
+let pulseActive=new Set(),pulseFront=new Set(),sPulse=false;
+function startPulse(){const n=vc();if(n===0)return;pulseActive=new Set([0]);pulseFront=new Set([0]);sPulse=true}
+function stepPulse(){if(!sPulse||pulseFront.size===0){sPulse=false;return}const n=vc(),nx=new Set();for(const[a,b]of lnk)if(a<n&&b<n&&pulseFront.has(a)&&!pulseActive.has(b)){nx.add(b);pulseActive.add(b)}pulseFront=nx;if(nx.size===0)setTimeout(()=>{sPulse=false;pulseActive.clear()},1500)}
+
+let bellActive=new Set(),bellAncestors=new Set(),bellPairCount=0,bellS2=0;
+let bellLines=[];
+function runBellTest(){
+  bellActive=new Set();bellAncestors=new Set();bellPairCount=0;
+  while(bellLines.length){const l=bellLines.pop();scene.remove(l)}
+  const n=vc();if(n<50)return;
+  const adjBack=Array.from({length:n},()=>[]);
+  for(const[a,b]of lnk)if(a<n&&b<n)adjBack[b].push(a);
+  let pairA=-1,pairB=-1;
+  for(let tries=0;tries<500;tries++){
+    const a=Math.floor(Math.random()*n*0.3)+Math.floor(n*0.5);
+    const b=Math.floor(Math.random()*n*0.3)+Math.floor(n*0.5);
+    if(a>=n||b>=n||a===b)continue;
+    const pa=pts[a],pb=pts[b];
+    const dt=Math.abs(pa.t-pb.t),dx=Math.hypot(pa.x-pb.x,pa.z-pb.z);
+    if(dx>dt*0.8){pairA=a;pairB=b;break}
   }
-  pulseFront=next;pulseStep++;
-  if(next.size===0) setTimeout(()=>{sPulse=false;pulseActive.clear()},2000);
+  if(pairA<0)return;
+  bellActive.add(pairA);bellActive.add(pairB);bellPairCount=1;
+  const pastA=new Set(),pastB=new Set();
+  const qA=[pairA],qB=[pairB];
+  const depthLimit=15;
+  let dA=0;
+  while(qA.length>0&&dA<depthLimit){
+    const next=[];
+    for(const x of qA)for(const p of adjBack[x])if(!pastA.has(p)){pastA.add(p);next.push(p)}
+    qA.length=0;qA.push(...next);dA++;
+  }
+  let dB=0;
+  while(qB.length>0&&dB<depthLimit){
+    const next=[];
+    for(const x of qB)for(const p of adjBack[x])if(!pastB.has(p)){pastB.add(p);next.push(p)}
+    qB.length=0;qB.push(...next);dB++;
+  }
+  for(const x of pastA)if(pastB.has(x))bellAncestors.add(x);
+  const spacelineGeo=new THREE.BufferGeometry().setFromPoints([P(pts[pairA]),P(pts[pairB])]);
+  const spaceline=new THREE.Line(spacelineGeo,new THREE.LineDashedMaterial({color:0xffdd44,dashSize:0.15,gapSize:0.1,transparent:true,opacity:0.8}));
+  spaceline.computeLineDistances();
+  scene.add(spaceline);bellLines.push(spaceline);
+  const pathsGeo=[];
+  for(const anc of bellAncestors){
+    pathsGeo.push(P(pts[anc]),P(pts[pairA]));
+    pathsGeo.push(P(pts[anc]),P(pts[pairB]));
+  }
+  if(pathsGeo.length>0){
+    const pg=new THREE.BufferGeometry().setFromPoints(pathsGeo);
+    const pl=new THREE.LineSegments(pg,new THREE.LineBasicMaterial({color:0xff8800,transparent:true,opacity:0.25,blending:THREE.AdditiveBlending}));
+    scene.add(pl);bellLines.push(pl);
+  }
+  bellS2=8;
+  sBell=true;
+  setTimeout(()=>{
+    sBell=false;bellActive.clear();bellAncestors.clear();
+    while(bellLines.length){const l=bellLines.pop();scene.remove(l)}
+  },6000);
+}
+
+function computeMassRatios(){
+  const n=vc();if(n<20)return;
+  let proj0=0,proj1=0,proj2=0,cnt=0;
+  const start=Math.max(0,n-200);
+  for(let i=start;i<n;i++){
+    const p=pts[i];if(p.nChains===0)continue;
+    const cn=norm3(p.cEff);
+    proj0+=Math.abs(dot3(cn,s1));
+    proj1+=Math.abs(dot3(cn,s2));
+    proj2+=Math.abs(dot3(cn,s3));
+    cnt++;
+  }
+  if(cnt===0)return;
+  proj0/=cnt;proj1/=cnt;proj2/=cnt;
+  const sorted=[proj0,proj1,proj2].sort((a,b)=>b-a);
+  const m3=sorted[0],m2=sorted[1],m1=sorted[2];
+  const mc_mt=m2>0&&m3>0?m2/m3:0;
+  const weakK=m3,weakP=1-weakK;
+  const mt_mb=weakP>0?weakK/weakP:999;
+  const product=mc_mt*mt_mb;
+  document.getElementById('mg3').textContent=m3.toFixed(3);
+  document.getElementById('mg2').textContent=m2.toFixed(3);
+  document.getElementById('mg1').textContent=m1.toFixed(3);
+  document.getElementById('mgb').textContent=(m3*weakP).toFixed(3);
+  document.getElementById('mb3').style.width=(m3*100)+'%';
+  document.getElementById('mb2').style.width=(m2*100)+'%';
+  document.getElementById('mb1').style.width=(m1*100)+'%';
+  document.getElementById('mbb').style.width=(m3*weakP*100)+'%';
+  document.getElementById('sMc').textContent=mc_mt.toFixed(4);
+  document.getElementById('sTb').textContent=mt_mb.toFixed(0);
+  document.getElementById('prodRule').textContent=product.toFixed(3);
+  const decoherence=Math.min(100,Math.sqrt(n)*2);
+  document.getElementById('decoFill').style.width=decoherence+'%';
+  document.getElementById('decoVal').textContent=Math.round(decoherence)+'%';
+}
+
+const fCv=document.getElementById('fiberCv'),fCtx=fCv.getContext('2d');
+function drawFiber(){
+  const n=vc();
+  fCtx.fillStyle='rgba(8,8,20,0.95)';fCtx.fillRect(0,0,160,160);
+  const cx=80,cy=80,r=65;
+  fCtx.strokeStyle='rgba(123,140,255,0.1)';fCtx.lineWidth=0.5;
+  fCtx.beginPath();fCtx.arc(cx,cy,r,0,Math.PI*2);fCtx.stroke();
+  fCtx.beginPath();fCtx.moveTo(cx-r,cy);fCtx.lineTo(cx+r,cy);fCtx.stroke();
+  fCtx.beginPath();fCtx.moveTo(cx,cy-r);fCtx.lineTo(cx,cy+r);fCtx.stroke();
+  fCtx.fillStyle='rgba(255,68,102,0.8)';
+  fCtx.beginPath();fCtx.arc(cx+r*0.9,cy,4,0,Math.PI*2);fCtx.fill();
+  fCtx.fillStyle='rgba(255,68,102,0.15)';
+  fCtx.font='8px JetBrains Mono';fCtx.fillText('φ',cx+r*0.9-2,cy-8);
+  fCtx.fillStyle='rgba(0,255,136,0.3)';
+  fCtx.beginPath();fCtx.arc(cx,cy-r*0.9,3,0,Math.PI*2);fCtx.fill();
+  fCtx.fillStyle='rgba(255,170,34,0.3)';
+  fCtx.beginPath();fCtx.arc(cx-r*0.6,cy+r*0.6,3,0,Math.PI*2);fCtx.fill();
+  fCtx.font='7px JetBrains Mono';
+  fCtx.fillStyle='rgba(255,68,102,0.3)';fCtx.fillText('s₁',cx+r*0.9+6,cy+3);
+  fCtx.fillStyle='rgba(0,255,136,0.2)';fCtx.fillText('s₂',cx+4,cy-r*0.9+3);
+  fCtx.fillStyle='rgba(255,170,34,0.2)';fCtx.fillText('s₃',cx-r*0.6+6,cy+r*0.6+3);
+  const start=Math.max(0,n-80);
+  for(let i=start;i<n;i++){
+    const p=pts[i];if(!p||p.nChains===0)continue;
+    const cn=norm3(p.cEff);
+    const px=cx+cn[0]*r*0.85,py=cy-cn[1]*r*0.85;
+    const age=(n-i)/80;
+    fCtx.fillStyle=`rgba(255,255,255,${0.6*(1-age)})`;
+    fCtx.beginPath();fCtx.arc(px,py,1.5,0,Math.PI*2);fCtx.fill();
+  }
 }
 
 function startBigBang(){
-  if(pts.length<10)return;
-  bigBang=true; bbIdx=0;
-  bbBornTimes=[];
-  clearAllVisuals();
-  cTgt.set(0,1,0); cD=18; updCam();
-  const ml=document.getElementById('mlab');
-  ml.textContent='Big bang';ml.classList.add('show');
-  setTimeout(()=>ml.classList.remove('show'),2500);
+  if(pts.length<10)return;bigBang=true;bbIdx=0;bbBorn=[];
+  ptM.count=0;[linkGrp,chainGrp,trailGrp,coneGrp].forEach(g=>{while(g.children.length)g.remove(g.children[0])});
+  pulseActive.clear();bellActive.clear();bellAncestors.clear();while(bellLines.length){const l=bellLines.pop();scene.remove(l)}chn=[];cTgt.set(0,1,0);cD=18;uC();
+  const ml=document.getElementById('mlab');ml.textContent='Big bang';ml.classList.add('show');setTimeout(()=>ml.classList.remove('show'),2500);
 }
 
-function clearAllVisuals(){
-  ptMesh.count=0;
-  [linkGrp,chainGrp,trailGrp,coneGrp].forEach(g=>{while(g.children.length)g.remove(g.children[0])});
-  pulseActive.clear();sPulse=false;chn=[];
-}
-
-let fr=0, lastB=0;
+let fr=0,lastB=0;
 function loop(t){
-  requestAnimationFrame(loop);
-  fr++;
-  if(!paused&&!bigBang){
-    const iv=1000/bRate;
-    if(t-lastB>iv){addEl();lastB=t}
-  }
-  if(bigBang){
-    const batch=Math.max(1,Math.ceil(bRate*0.6));
-    const now=performance.now();
-    for(let i=0;i<batch&&bbIdx<pts.length;i++){
-      bbBornTimes[bbIdx]=now;
-      bbIdx++;
-    }
-    if(bbIdx>0) flashGlow(pts[bbIdx-1]);
-    if(bbIdx>=pts.length){bigBang=false;bbBornTimes=[]}
-  }
-  if(glowSprite.visible){
-    glowSprite.scale.multiplyScalar(0.91);
-    glowSprite.material.opacity*=0.92;
-    if(glowSprite.material.opacity<0.01) glowSprite.visible=false;
-  }
-  if(!drag) cTh+=0.0006;
-  const vc=visCount();
-  if(vc>10){
-    const targetY=pts[vc-1].t*0.7*0.65;
-    cTgt.y+=(targetY-cTgt.y)*0.02;
-  }
-  updCam();
-  if(fr%4===0) updPts();
-  if(fr%12===0){
-    rebuildLinks();
-    rebuildTrail();
-    if(sChain){compChain();rebuildChain()}
-    if(sCones) rebuildCones();
-  }
-  if(sPulse&&fr%5===0) stepPulse();
-  if(fr%8===0){
-    const v=visCount();
-    let vLinks=0;
-    for(const[a,b]of lnk) if(a<v&&b<v) vLinks++;
-    document.getElementById('sN').textContent=v;
-    document.getElementById('sL').textContent=vLinks;
+  requestAnimationFrame(loop);fr++;
+  if(!paused&&!bigBang){const iv=1000/bRate;if(t-lastB>iv){addEl();lastB=t}}
+  if(bigBang){const batch=Math.max(1,Math.ceil(bRate*0.6));const now=performance.now();for(let i=0;i<batch&&bbIdx<pts.length;i++){bbBorn[bbIdx]=now;bbIdx++}if(bbIdx>0){glS.position.copy(P(pts[bbIdx-1]));glS.visible=true;glS.scale.set(2.5,2.5,1);glS.material.opacity=1}if(bbIdx>=pts.length){bigBang=false;bbBorn=[]}}
+  if(glS.visible){glS.scale.multiplyScalar(0.91);glS.material.opacity*=0.92;if(glS.material.opacity<0.01)glS.visible=false}
+  if(!drag)cTh+=0.0005;
+  const n=vc();if(n>10)cTgt.y+=(pts[n-1].t*0.7*0.6-cTgt.y)*0.02;
+  uC();
+  if(fr%4===0)updPts();
+  if(fr%14===0){rebuildLinks();rebuildTrail();if(sChain){compChain();rebuildChain()}if(sCones)rebuildCones()}
+  if(sPulse&&fr%5===0)stepPulse();
+  if(fr%20===0){computeMassRatios();drawFiber()}
+  if(fr%20===0&&sBell){document.getElementById('bellAnc').textContent=bellAncestors.size}
+  if(fr%10===0){
+    let vL=0;for(const[a,b]of lnk)if(a<n&&b<n)vL++;
+    document.getElementById('sN').textContent=n;
+    document.getElementById('sL').textContent=vL;
     document.getElementById('sC').textContent=chn.length;
-    document.getElementById('sT').textContent=(v>0?pts[v-1].t:0).toFixed(1);
-    document.getElementById('sR').textContent=v>0?(2*vLinks/v).toFixed(1):'0';
+    document.getElementById('sT').textContent=(n>0?pts[n-1].t:0).toFixed(1);
   }
-  renderer.render(scene,camera);
+  R.render(scene,camera);
 }
 requestAnimationFrame(loop);
 
 document.getElementById('rRate').oninput=e=>{bRate=+e.target.value;document.getElementById('vRate').textContent=bRate};
 document.getElementById('rLink').oninput=e=>{lkOp=+e.target.value/100;document.getElementById('vLink').textContent=e.target.value};
-document.getElementById('rSize').oninput=e=>{ptSz=+e.target.value/100;document.getElementById('vSize').textContent=e.target.value};
-
-function tog(id,get,set){
-  document.getElementById(id).onclick=function(){
-    set(!get());this.classList.toggle('on',get());
-    if(id==='bChain'){if(get()){compChain();rebuildChain()}else{while(chainGrp.children.length)chainGrp.remove(chainGrp.children[0]);chn=[]}}
-    if(id==='bCones'&&!get()){while(coneGrp.children.length)coneGrp.remove(coneGrp.children[0])}
-    if(id==='bTrail'&&!get()){while(trailGrp.children.length)trailGrp.remove(trailGrp.children[0])}
-  };
-}
+document.getElementById('rBeta').oninput=e=>{beta=+e.target.value;document.getElementById('vBeta').textContent=beta};
+function tog(id,get,set){document.getElementById(id).onclick=function(){set(!get());this.classList.toggle('on',get());if(id==='bChain'){if(get()){compChain();rebuildChain()}else{while(chainGrp.children.length)chainGrp.remove(chainGrp.children[0]);chn=[]}}if(id==='bCones'&&!get())while(coneGrp.children.length)coneGrp.remove(coneGrp.children[0]);if(id==='bTrail'&&!get())while(trailGrp.children.length)trailGrp.remove(trailGrp.children[0])}}
 tog('bLinks',()=>sLinks,v=>sLinks=v);
+tog('bGen',()=>sGen,v=>sGen=v);
 tog('bChain',()=>sChain,v=>sChain=v);
 tog('bCones',()=>sCones,v=>sCones=v);
 tog('bTrail',()=>sTrail,v=>sTrail=v);
-document.getElementById('bPulse').onclick=function(){startPulse();this.classList.add('on');setTimeout(()=>this.classList.remove('on'),4000)};
+document.getElementById('bPulse').onclick=function(){startPulse();this.classList.add('on');setTimeout(()=>this.classList.remove('on'),3000)};
+document.getElementById('bBell').onclick=function(){runBellTest();this.classList.add('on');document.getElementById('bellPanel').classList.remove('hide');setTimeout(()=>{this.classList.remove('on');document.getElementById('bellPanel').classList.add('hide')},5000)};
 document.getElementById('bBang').onclick=startBigBang;
 document.getElementById('bPause').onclick=function(){paused=!paused;this.textContent=paused?'Resume':'Pause';this.classList.toggle('on')};
-document.getElementById('bReset').onclick=function(){
-  pts=[];lnk=[];chn=[];maxT=0;bigBang=false;bbIdx=0;bbBornTimes=[];
-  clearAllVisuals();cTgt.set(0,2,0);
-};
-document.getElementById('bInfo').onclick=function(){document.getElementById('inf').classList.toggle('show');this.classList.toggle('on')};
-window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+document.getElementById('bReset').onclick=function(){pts=[];lnk=[];chn=[];maxT=0;bigBang=false;bbIdx=0;bbBorn=[];ptM.count=0;[linkGrp,chainGrp,trailGrp,coneGrp].forEach(g=>{while(g.children.length)g.remove(g.children[0])});pulseActive.clear();bellActive.clear();bellAncestors.clear();while(bellLines.length){const l=bellLines.pop();scene.remove(l)}sBell=false;cTgt.set(0,2,0)};
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();R.setSize(innerWidth,innerHeight)});
 </script>
 </body>
 </html>
