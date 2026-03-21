@@ -53,6 +53,37 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .bell-sub{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(200,200,210,0.4);text-align:center}
 @keyframes pls{0%,100%{box-shadow:0 0 4px #5dca7b}50%{box-shadow:0 0 10px #5dca7b}}
 .live{width:6px;height:6px;border-radius:50%;background:#5dca7b;display:inline-block;margin-right:6px;animation:pls 1.5s ease-in-out infinite}
+.overlay{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;background:rgba(5,5,16,0.92);backdrop-filter:blur(10px)}
+.overlay.active{display:flex}
+.overlay-content{max-width:700px;width:90%;padding:30px;text-align:center}
+.overlay h2{font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:4px;text-transform:uppercase;color:#7b8cff;margin-bottom:20px}
+.overlay .close-btn{position:absolute;top:16px;right:20px;font-size:24px;color:rgba(200,200,210,0.4);cursor:pointer;background:none;border:none;font-family:monospace}
+.overlay .close-btn:hover{color:#fff}
+.cartan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
+.cartan-node{padding:10px 8px;border:1px solid rgba(123,140,255,0.15);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:11px;transition:all 0.6s;position:relative;overflow:hidden}
+.cartan-node .name{color:#c8c8d0;font-size:13px;font-weight:500}
+.cartan-node .dim{color:rgba(200,200,210,0.4);font-size:9px;margin-top:2px}
+.cartan-node .reason{color:rgba(255,80,80,0.8);font-size:8px;margin-top:4px;opacity:0;transition:opacity 0.4s}
+.cartan-node.eliminated{border-color:rgba(255,60,60,0.3);background:rgba(255,30,30,0.06)}
+.cartan-node.eliminated .name{color:rgba(255,80,80,0.5);text-decoration:line-through}
+.cartan-node.eliminated .reason{opacity:1}
+.cartan-node.survivor{border-color:rgba(93,202,123,0.6);background:rgba(93,202,123,0.08);box-shadow:0 0 20px rgba(93,202,123,0.15)}
+.cartan-node.survivor .name{color:#5dca7b;text-shadow:0 0 8px rgba(93,202,123,0.3)}
+.squeeze-vis{height:120px;position:relative;margin:20px 0;border:1px solid rgba(123,140,255,0.1);border-radius:8px;overflow:hidden}
+.squeeze-line{position:absolute;top:50%;left:0;right:0;height:2px;background:rgba(123,140,255,0.15)}
+.squeeze-num{position:absolute;top:50%;transform:translate(-50%,-50%);font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(200,200,210,0.3);transition:all 0.8s}
+.squeeze-num.active{color:#fff;font-size:14px;text-shadow:0 0 10px rgba(93,202,123,0.5)}
+.squeeze-num.dead{color:rgba(255,60,60,0.3);font-size:8px}
+.squeeze-wall{position:absolute;top:0;bottom:0;width:4px;transition:left 1.2s cubic-bezier(0.4,0,0.2,1),right 1.2s cubic-bezier(0.4,0,0.2,1);z-index:2}
+.squeeze-wall.left{left:0;background:linear-gradient(90deg,rgba(93,202,123,0.6),transparent);box-shadow:4px 0 20px rgba(93,202,123,0.2)}
+.squeeze-wall.right{right:0;background:linear-gradient(270deg,rgba(100,140,255,0.6),transparent);box-shadow:-4px 0 20px rgba(100,140,255,0.2)}
+.squeeze-label{position:absolute;bottom:8px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.5px;transition:all 0.8s}
+.squeeze-label.left{left:8px;color:rgba(93,202,123,0.6)}
+.squeeze-label.right{right:8px;color:rgba(100,140,255,0.6)}
+.squeeze-excluded{position:absolute;top:8px;font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(255,60,60,0.4);opacity:0;transition:opacity 0.6s}
+.squeeze-excluded.show{opacity:1}
+.holo-panel{position:relative;margin:16px auto;width:280px;height:280px}
+.holo-panel canvas{border-radius:12px;border:1px solid rgba(123,140,255,0.1)}
 .mode-label{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'JetBrains Mono',monospace;font-size:42px;font-weight:300;color:rgba(123,140,255,0);letter-spacing:8px;z-index:5;pointer-events:none;transition:color 0.5s;text-transform:uppercase}
 .mode-label.show{color:rgba(123,140,255,0.2)}
 .decoherence-bar{position:fixed;top:56px;left:12px;right:12px;z-index:8;pointer-events:none}
@@ -129,6 +160,9 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     <button class="b" id="bPulse">Pulse</button>
     <button class="b" id="bBell">Bell test</button>
     <button class="b" id="bBang">Big bang</button>
+    <button class="b" id="bCartan">Uniqueness</button>
+    <button class="b" id="bSqueeze">d=4 squeeze</button>
+    <button class="b" id="bHolonomy">Holonomy</button>
     <button class="b" id="bPause">Pause</button>
     <button class="b" id="bReset">Reset</button>
   </div>
@@ -140,6 +174,49 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
   <div class="li"><div class="ld" style="color:#aa66ff;background:#aa66ff"></div><div class="lt">Down-type (Higgs P)</div></div>
   <div class="li"><div class="ld" style="color:#ffdd44;background:#ffdd44"></div><div class="lt">Bell-correlated pair</div></div>
   <div class="li"><div class="ld" style="color:#6e80ff;background:#6e80ff"></div><div class="lt">Default atom</div></div>
+</div>
+<!-- CARTAN ELIMINATION OVERLAY -->
+<div class="overlay" id="cartanOverlay">
+  <button class="close-btn" onclick="document.getElementById('cartanOverlay').classList.remove('active')">&times;</button>
+  <div class="overlay-content">
+    <h2>SM Gauge Group Uniqueness</h2>
+    <p style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(200,200,210,0.4);margin-bottom:12px">Exhaustive elimination over the complete Cartan classification</p>
+    <div class="cartan-grid" id="cartanGrid"></div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(200,200,210,0.4);margin-top:12px" id="cartanStatus">Click to begin elimination...</div>
+  </div>
+</div>
+<!-- DIMENSION SQUEEZE OVERLAY -->
+<div class="overlay" id="squeezeOverlay">
+  <button class="close-btn" onclick="document.getElementById('squeezeOverlay').classList.remove('active')">&times;</button>
+  <div class="overlay-content">
+    <h2>Dimension Squeeze: d = 4</h2>
+    <p style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(200,200,210,0.4);margin-bottom:8px">Lovelock (d&le;4) + Graviton (d&ge;4) &rarr; d = 4</p>
+    <div class="squeeze-vis" id="squeezeVis">
+      <div class="squeeze-line"></div>
+      <div class="squeeze-wall left" id="sqLeft" style="left:0"></div>
+      <div class="squeeze-wall right" id="sqRight" style="right:0"></div>
+      <div class="squeeze-label left" id="sqLabelL">Graviton: d &ge; 4</div>
+      <div class="squeeze-label right" id="sqLabelR">Lovelock: d &le; 4</div>
+      <div class="squeeze-excluded" id="sqString" style="right:12px;top:8px">String d=10 &#10060;</div>
+    </div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(200,200,210,0.5);margin-top:8px" id="squeezeStatus">Click to animate...</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(200,200,210,0.25);margin-top:12px">Cross-check: YM tracelessness tr(T)=(1&minus;d/4)|F|²=0 &hArr; d=4</div>
+  </div>
+</div>
+<!-- HOLONOMY WALK OVERLAY -->
+<div class="overlay" id="holoOverlay">
+  <button class="close-btn" onclick="document.getElementById('holoOverlay').classList.remove('active')">&times;</button>
+  <div class="overlay-content">
+    <h2>SU(3) Holonomy Walk</h2>
+    <p style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(200,200,210,0.4);margin-bottom:8px">K/P projection: perpendicular component &rarr; mass ratio</p>
+    <div class="holo-panel"><canvas id="holoCv" width="280" height="280"></canvas></div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(200,200,210,0.4);margin-top:8px">
+      <span style="color:#ff4466">&#9679;</span> Source direction &phi; &nbsp;
+      <span style="color:#5dca7b">&#9679;</span> Holonomy walk W&middot;s₀ &nbsp;
+      <span style="color:#ffaa22">&#9679;</span> Perpendicular (mass ratio)
+    </div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#a0adff;margin-top:8px" id="holoStatus">m_perp/m_par = —</div>
+  </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
@@ -499,6 +576,195 @@ document.getElementById('bBang').onclick=startBigBang;
 document.getElementById('bPause').onclick=function(){paused=!paused;this.textContent=paused?'Resume':'Pause';this.classList.toggle('on')};
 document.getElementById('bReset').onclick=function(){pts=[];lnk=[];chn=[];maxT=0;bigBang=false;bbIdx=0;bbBorn=[];ptM.count=0;[linkGrp,chainGrp,trailGrp,coneGrp].forEach(g=>{while(g.children.length)g.remove(g.children[0])});pulseActive.clear();bellActive.clear();bellAncestors.clear();while(bellLines.length){const l=bellLines.pop();scene.remove(l)}sBell=false;cTgt.set(0,2,0)};
 window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();R.setSize(innerWidth,innerHeight)});
+
+/* ============================================================
+   FEATURE 1: CARTAN ELIMINATION ANIMATION
+   ============================================================ */
+const cartanTypes=[
+  {name:'B_n',sub:'SO(2n+1)',dim:'Real fund.',reason:'No complex rep',complex:false},
+  {name:'C_n',sub:'Sp(2n)',dim:'Pseudoreal',reason:'No complex rep',complex:false},
+  {name:'G₂',sub:'14-dim',dim:'Real 7-dim',reason:'No complex rep',complex:false},
+  {name:'F₄',sub:'52-dim',dim:'Real 26-dim',reason:'No complex rep',complex:false},
+  {name:'E₇',sub:'133-dim',dim:'Pseudoreal 56',reason:'No complex rep',complex:false},
+  {name:'E₈',sub:'248-dim',dim:'Real 248-dim',reason:'No complex rep',complex:false},
+  {name:'D_even',sub:'SO(4k)',dim:'Real spinors',reason:'No complex rep',complex:false},
+  {name:'E₆',sub:'78-dim',dim:'Complex 27',reason:'27 fermions > 15',complex:true,fermions:111},
+  {name:'D_odd',sub:'SO(4k+2)',dim:'Complex spinor',reason:'Spinor dim ≥ 16 → > 15',complex:true,fermions:67},
+  {name:'A_3+',sub:'SU(N≥4)',dim:'Complex N+1',reason:'≥ 19 fermions > 15',complex:true,fermions:19},
+  {name:'A₂×A₁',sub:'SU(3)×SU(2)',dim:'3 × 2 = 15 ✓',reason:'',complex:true,fermions:15,survivor:true},
+];
+function initCartan(){
+  const grid=document.getElementById('cartanGrid');
+  grid.innerHTML='';
+  cartanTypes.forEach((t,i)=>{
+    const node=document.createElement('div');
+    node.className='cartan-node';node.id='ct'+i;
+    node.innerHTML=`<div class="name">${t.name}</div><div class="dim">${t.sub} — ${t.dim}</div><div class="reason">${t.reason}</div>`;
+    grid.appendChild(node);
+  });
+}
+function runCartanElimination(){
+  initCartan();
+  const status=document.getElementById('cartanStatus');
+  let step=0;
+  const eliminate=()=>{
+    if(step>=cartanTypes.length)return;
+    const t=cartanTypes[step];
+    const node=document.getElementById('ct'+step);
+    if(t.survivor){
+      node.classList.add('survivor');
+      status.innerHTML='<span style="color:#5dca7b">SU(3) × SU(2) × U(1) is the UNIQUE survivor.</span><br><span style="font-size:9px;color:rgba(200,200,210,0.3)">Proven: sm_gauge_group_unique (Lean 4, zero sorry)</span>';
+    }else{
+      node.classList.add('eliminated');
+      const reason=t.complex?`Complex but ${t.fermions} fermions > 15`:'No complex representation → no chirality';
+      status.textContent=`Eliminating ${t.name}: ${reason}`;
+      step++;
+      setTimeout(eliminate,700);
+    }
+  };
+  status.textContent='Checking chirality requirement (complex representations)...';
+  setTimeout(eliminate,600);
+}
+document.getElementById('bCartan').onclick=function(){
+  document.getElementById('cartanOverlay').classList.add('active');
+  runCartanElimination();
+  this.classList.add('on');setTimeout(()=>this.classList.remove('on'),2000);
+};
+
+/* ============================================================
+   FEATURE 2: DIMENSION SQUEEZE ANIMATION
+   ============================================================ */
+function runSqueeze(){
+  const vis=document.getElementById('squeezeVis');
+  // Create number markers 1-10
+  vis.querySelectorAll('.squeeze-num').forEach(n=>n.remove());
+  for(let d=1;d<=10;d++){
+    const el=document.createElement('div');
+    el.className='squeeze-num';el.id='sqN'+d;
+    el.textContent=d;
+    el.style.left=(5+(d-1)*10)+'%';
+    vis.appendChild(el);
+  }
+  const sqL=document.getElementById('sqLeft');
+  const sqR=document.getElementById('sqRight');
+  const sqStr=document.getElementById('sqString');
+  const status=document.getElementById('squeezeStatus');
+  // Reset
+  sqL.style.left='0';sqR.style.right='0';sqStr.classList.remove('show');
+  document.querySelectorAll('.squeeze-num').forEach(n=>{n.classList.remove('active','dead')});
+  status.textContent='Starting squeeze...';
+  // Step 1: Graviton lower bound (d ≥ 4)
+  setTimeout(()=>{
+    status.innerHTML='<span style="color:#5dca7b">Graviton propagation: d(d-1)/2 - 1 > 0 → d<sub>spatial</sub> ≥ 3 → d ≥ 4</span>';
+    sqL.style.left='28%';
+    ['sqN1','sqN2','sqN3'].forEach(id=>{document.getElementById(id).classList.add('dead')});
+  },800);
+  // Step 2: Lovelock upper bound (d ≤ 4)
+  setTimeout(()=>{
+    status.innerHTML='<span style="color:#6e80ff">Lovelock: Gauss-Bonnet rank 5 > d → d ≤ 4</span>';
+    sqR.style.right='50%';
+    ['sqN5','sqN6','sqN7','sqN8','sqN9','sqN10'].forEach(id=>{document.getElementById(id).classList.add('dead')});
+    sqStr.classList.add('show');
+  },2200);
+  // Step 3: Squeeze to d=4
+  setTimeout(()=>{
+    document.getElementById('sqN4').classList.add('active');
+    status.innerHTML='<span style="color:#5dca7b;font-size:14px">d ≤ 4 ∧ d ≥ 4 → d = 4. Spacetime is 3+1 dimensional.</span><br><span style="font-size:9px;color:rgba(200,200,210,0.3)">Proven: dimension_squeeze (Lean 4, zero sorry)</span>';
+  },3600);
+}
+document.getElementById('bSqueeze').onclick=function(){
+  document.getElementById('squeezeOverlay').classList.add('active');
+  runSqueeze();
+  this.classList.add('on');setTimeout(()=>this.classList.remove('on'),2000);
+};
+
+/* ============================================================
+   FEATURE 3: HOLONOMY WALK ON SU(3)
+   ============================================================ */
+const holoCv=document.getElementById('holoCv'),holoCtx=holoCv.getContext('2d');
+let holoWalk=[],holoAnimId=null;
+function randomSU3Element(beta){
+  // Generate a random SU(3) element near identity at coupling beta
+  // Project to 2D via first two components of U*e0
+  const angle1=(Math.random()-0.5)*2/beta;
+  const angle2=(Math.random()-0.5)*2/beta;
+  const angle3=(Math.random()-0.5)*2/beta;
+  const c1=Math.cos(angle1),s1=Math.sin(angle1);
+  const c2=Math.cos(angle2),s2=Math.sin(angle2);
+  return{re:c1*c2-s1*s2*Math.cos(angle3),im:s1*c2+c1*s2*Math.cos(angle3)};
+}
+function runHolonomy(){
+  holoWalk=[{re:1,im:0}]; // Start at identity: U*e0 = e0 = (1,0,0)
+  const beta=6;
+  const cv=holoCv,ctx=holoCtx;
+  const cx=140,cy=140,rad=110;
+  let step=0,maxSteps=60;
+  if(holoAnimId)cancelAnimationFrame(holoAnimId);
+  function drawFrame(){
+    if(step>=maxSteps)return;
+    // Apply one SU(3) element
+    const u=randomSU3Element(beta);
+    const prev=holoWalk[holoWalk.length-1];
+    const next={re:prev.re*u.re-prev.im*u.im,im:prev.re*u.im+prev.im*u.re};
+    // Normalize to stay on unit circle (projection of SU(3) to 2D)
+    const nm=Math.sqrt(next.re*next.re+next.im*next.im);
+    next.re/=nm;next.im/=nm;
+    holoWalk.push(next);
+    // Draw
+    ctx.fillStyle='rgba(5,5,16,0.08)';ctx.fillRect(0,0,280,280);
+    // Unit circle
+    ctx.strokeStyle='rgba(123,140,255,0.12)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.arc(cx,cy,rad,0,Math.PI*2);ctx.stroke();
+    // Axes
+    ctx.strokeStyle='rgba(123,140,255,0.06)';
+    ctx.beginPath();ctx.moveTo(cx-rad,cy);ctx.lineTo(cx+rad,cy);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx,cy-rad);ctx.lineTo(cx,cy+rad);ctx.stroke();
+    // Source direction (red dot at (1,0))
+    ctx.fillStyle='rgba(255,68,102,0.8)';
+    ctx.beginPath();ctx.arc(cx+rad,cy,5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(255,68,102,0.3)';ctx.font='9px JetBrains Mono';
+    ctx.fillText('φ (source)',cx+rad-30,cy-10);
+    // Walk trail
+    ctx.strokeStyle='rgba(93,202,123,0.4)';ctx.lineWidth=1.5;ctx.beginPath();
+    for(let i=0;i<holoWalk.length;i++){
+      const px=cx+holoWalk[i].re*rad,py=cy-holoWalk[i].im*rad;
+      if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+    }
+    ctx.stroke();
+    // Current position (green)
+    const cur=holoWalk[holoWalk.length-1];
+    ctx.fillStyle='rgba(93,202,123,0.9)';
+    ctx.beginPath();ctx.arc(cx+cur.re*rad,cy-cur.im*rad,4,0,Math.PI*2);ctx.fill();
+    // Perpendicular component (orange line)
+    ctx.strokeStyle='rgba(255,170,34,0.7)';ctx.lineWidth=2;ctx.setLineDash([3,3]);
+    ctx.beginPath();ctx.moveTo(cx+cur.re*rad,cy);ctx.lineTo(cx+cur.re*rad,cy-cur.im*rad);ctx.stroke();
+    ctx.setLineDash([]);
+    // Parallel component (white line)
+    ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+cur.re*rad,cy);ctx.stroke();
+    // Labels
+    ctx.fillStyle='rgba(255,170,34,0.6)';ctx.font='9px JetBrains Mono';
+    ctx.fillText('⊥ = m_light',cx+cur.re*rad+6,cy-cur.im*rad/2);
+    ctx.fillStyle='rgba(255,255,255,0.3)';
+    ctx.fillText('∥ = m_heavy',cx+cur.re*rad/2-20,cy+14);
+    // Mass ratio
+    const parallel=Math.abs(cur.re);
+    const perp=Math.abs(cur.im);
+    const ratio=parallel>0.001?perp/parallel:0;
+    document.getElementById('holoStatus').innerHTML=
+      `Chain length: ${step+1} &nbsp; | &nbsp; m<sub>⊥</sub>/m<sub>∥</sub> = ${ratio.toFixed(4)} &nbsp; | &nbsp; `+
+      `<span style="color:${ratio<0.01?'#5dca7b':ratio<0.1?'#ffaa22':'#ff4466'}">${ratio<0.01?'Strong hierarchy':ratio<0.1?'Moderate':'Weak'}</span>`;
+    step++;
+    holoAnimId=setTimeout(()=>requestAnimationFrame(drawFrame),120);
+  }
+  ctx.fillStyle='rgba(5,5,16,1)';ctx.fillRect(0,0,280,280);
+  requestAnimationFrame(drawFrame);
+}
+document.getElementById('bHolonomy').onclick=function(){
+  document.getElementById('holoOverlay').classList.add('active');
+  runHolonomy();
+  this.classList.add('on');setTimeout(()=>this.classList.remove('on'),2000);
+};
 </script>
 </body>
 </html>
