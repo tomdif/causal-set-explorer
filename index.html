@@ -126,6 +126,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     <button class="b" id="bChain">Chain</button>
     <button class="b" id="bCones">Cones</button>
     <button class="b on" id="bTrail">Trail</button>
+    <button class="b" id="bHeat">Heatmap</button>
     <button class="b" id="bPulse">Pulse</button>
     <button class="b" id="bBell">Bell test</button>
     <button class="b" id="bBang">Big bang</button>
@@ -140,14 +141,28 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
   <div class="li"><div class="ld" style="color:#aa66ff;background:#aa66ff"></div><div class="lt">Down-type (Higgs P)</div></div>
   <div class="li"><div class="ld" style="color:#ffdd44;background:#ffdd44"></div><div class="lt">Bell-correlated pair</div></div>
   <div class="li"><div class="ld" style="color:#6e80ff;background:#6e80ff"></div><div class="lt">Default atom</div></div>
+  <div class="li"><div class="ld" style="color:#00ddff;background:linear-gradient(90deg,#1a1aff,#00ddff,#fff);width:24px;border-radius:3px;height:6px"></div><div class="lt">Proper time (heatmap)</div></div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
 <script>
 const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,0.1,500);
 const R=new THREE.WebGLRenderer({antialias:true});
 R.setSize(innerWidth,innerHeight);R.setPixelRatio(Math.min(devicePixelRatio,2));R.setClearColor(0x050510);
+R.toneMapping=THREE.ReinhardToneMapping;R.toneMappingExposure=1.2;
 document.body.prepend(R.domElement);
+
+/* ---- BLOOM POST-PROCESSING ---- */
+const composer=new THREE.EffectComposer(R);
+composer.addPass(new THREE.RenderPass(scene,camera));
+const bloomPass=new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),0.8,0.4,0.85);
+bloomPass.threshold=0.15;bloomPass.strength=0.8;bloomPass.radius=0.4;
+composer.addPass(bloomPass);
 
 let drag=false,pm={x:0,y:0},cTh=0.3,cPh=1.0,cD=18,cTgt=new THREE.Vector3(0,2,0);
 function uC(){camera.position.set(cTgt.x+cD*Math.sin(cPh)*Math.sin(cTh),cTgt.y+cD*Math.cos(cPh),cTgt.z+cD*Math.sin(cPh)*Math.cos(cTh));camera.lookAt(cTgt)}
@@ -162,7 +177,7 @@ scene.add(new THREE.GridHelper(30,30,0x0e0e28,0x08081a)).position.y=-0.5;
 
 const SR=6,MX=3000;
 let pts=[],lnk=[],chn=[],maxT=0;
-let sLinks=true,sChain=false,sCones=false,sTrail=true,sGen=true,sBell=false;
+let sLinks=true,sChain=false,sCones=false,sTrail=true,sGen=true,sBell=false,sHeatmap=false;
 let bRate=8,lkOp=0.4,beta=6,paused=false;
 let bigBang=false,bbIdx=0,bbBorn=[];
 
@@ -191,7 +206,7 @@ function addEl(){
   if(pts.length>=MX)return;
   maxT+=0.015+Math.random()*0.025;
   const genId=Math.floor(Math.random()*3);
-  const p={t:maxT,x:(Math.random()-0.5)*SR*2,z:(Math.random()-0.5)*SR*2,born:performance.now(),i:pts.length,cEff:[0,0,0],nChains:0,gen:genId,kStrength:0,massScale:0.3};
+  const p={t:maxT,x:(Math.random()-0.5)*SR*2,z:(Math.random()-0.5)*SR*2,born:performance.now(),i:pts.length,cEff:[0,0,0],nChains:0,gen:genId,kStrength:0,massScale:0.3,chainDepth:1};
   pts.push(p);
   const lo=Math.max(0,pts.length-400);
   for(let i=pts.length-2;i>=lo;i--){
@@ -206,6 +221,7 @@ function addEl(){
         const rotated=applyM(U,parentC);
         p.cEff[0]+=rotated[0];p.cEff[1]+=rotated[1];p.cEff[2]+=rotated[2];
         p.nChains++;
+        p.chainDepth=Math.max(p.chainDepth,o.chainDepth+1);
       }
     }
   }
@@ -217,7 +233,9 @@ function addEl(){
   const genProj=[sorted[0],sorted[1],sorted[2]];
   p.kStrength=genProj[p.gen];
   p.massScale=genProj[p.gen]/Math.max(0.01,genProj[0]);
-  glS.position.copy(P(p));glS.visible=true;glS.scale.set(2.5,2.5,1);glS.material.opacity=1;
+  const spawnPos=P(p);
+  glS.position.copy(spawnPos);glS.visible=true;glS.scale.set(2.5,2.5,1);glS.material.opacity=1;
+  emitSparks(spawnPos,genCols[genId]||cDefault);
 }
 
 const ptG=new THREE.SphereGeometry(1,8,6);
@@ -232,6 +250,45 @@ let coneGrp=new THREE.Group();scene.add(coneGrp);
 let glS;
 (function(){const c=document.createElement('canvas');c.width=64;c.height=64;const x=c.getContext('2d');const g=x.createRadialGradient(32,32,0,32,32,32);g.addColorStop(0,'rgba(0,255,136,1)');g.addColorStop(0.3,'rgba(0,255,136,0.4)');g.addColorStop(1,'rgba(0,255,136,0)');x.fillStyle=g;x.fillRect(0,0,64,64);glS=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,blending:THREE.AdditiveBlending}));glS.scale.set(2,2,1);glS.visible=false;scene.add(glS)})();
 
+/* ---- PARTICLE BURST SYSTEM ---- */
+const SPARK_MAX=600,SPARK_PER=8;
+const sparkGeo=new THREE.BufferGeometry();
+const sparkPos=new Float32Array(SPARK_MAX*3);
+const sparkVel=new Float32Array(SPARK_MAX*3);
+const sparkLife=new Float32Array(SPARK_MAX);
+const sparkCol=new Float32Array(SPARK_MAX*3);
+sparkGeo.setAttribute('position',new THREE.Float32BufferAttribute(sparkPos,3));
+sparkGeo.setAttribute('color',new THREE.Float32BufferAttribute(sparkCol,3));
+const sparkMat=new THREE.PointsMaterial({size:0.08,vertexColors:true,transparent:true,opacity:0.9,blending:THREE.AdditiveBlending,depthWrite:false});
+const sparkPts=new THREE.Points(sparkGeo,sparkMat);
+scene.add(sparkPts);
+let sparkHead=0;
+function emitSparks(pos,color){
+  for(let i=0;i<SPARK_PER;i++){
+    const si=sparkHead%SPARK_MAX;
+    sparkPos[si*3]=pos.x;sparkPos[si*3+1]=pos.y;sparkPos[si*3+2]=pos.z;
+    const sp=0.06;
+    sparkVel[si*3]=(Math.random()-0.5)*sp;sparkVel[si*3+1]=Math.random()*sp*1.5;sparkVel[si*3+2]=(Math.random()-0.5)*sp;
+    sparkLife[si]=1.0;
+    sparkCol[si*3]=color.r;sparkCol[si*3+1]=color.g;sparkCol[si*3+2]=color.b;
+    sparkHead++;
+  }
+}
+function updateSparks(){
+  const n=Math.min(sparkHead,SPARK_MAX);
+  for(let i=0;i<n;i++){
+    if(sparkLife[i]<=0)continue;
+    sparkLife[i]-=0.025;
+    sparkPos[i*3]+=sparkVel[i*3];sparkPos[i*3+1]+=sparkVel[i*3+1];sparkPos[i*3+2]+=sparkVel[i*3+2];
+    sparkVel[i*3+1]-=0.0008; // gravity
+    const fade=Math.max(0,sparkLife[i]);
+    sparkCol[i*3]*=0.97;sparkCol[i*3+1]*=0.97;sparkCol[i*3+2]*=0.97;
+    if(sparkLife[i]<=0){sparkPos[i*3+1]=-999} // hide dead sparks
+  }
+  sparkGeo.attributes.position.needsUpdate=true;
+  sparkGeo.attributes.color.needsUpdate=true;
+}
+
 const genCols=[new THREE.Color(0x5dca7b),new THREE.Color(0xffaa22),new THREE.Color(0xff4466)];
 const cDefault=new THREE.Color(0x6e80ff);
 const cPulseC=new THREE.Color(0xffdd44);
@@ -239,14 +296,28 @@ const cBellC=new THREE.Color(0xffdd44);
 const cDownType=new THREE.Color(0xaa66ff);
 const dm=new THREE.Object3D();
 
+/* ---- PROPER TIME HEATMAP ---- */
+const heatCold=new THREE.Color(0x1a1aff);
+const heatMid=new THREE.Color(0x00ddff);
+const heatHot=new THREE.Color(0xffffff);
+function heatColor(depth,maxD){
+  const t=Math.min(1,depth/Math.max(1,maxD));
+  const c=new THREE.Color();
+  if(t<0.5){c.lerpColors(heatCold,heatMid,t*2)}
+  else{c.lerpColors(heatMid,heatHot,(t-0.5)*2)}
+  return c;
+}
+
 function updPts(){
   const n=vc();ptM.count=n;const now=performance.now();
+  let maxDepth=1;
+  if(sHeatmap){for(let i=0;i<n;i++)if(pts[i].chainDepth>maxDepth)maxDepth=pts[i].chainDepth}
   for(let i=0;i<n;i++){
     const p=pts[i];dm.position.copy(P(p));
     const bt=bigBang?(bbBorn[i]||now):p.born;
     const age=(now-bt)/1000;
     const birthPop=age<0.6?1+(0.6-age)*5:1;
-    const massFactor=sGen?Math.max(0.3,p.massScale):1;
+    const massFactor=sGen&&!sHeatmap?Math.max(0.3,p.massScale):1;
     const sc=0.04*birthPop*massFactor;
     dm.scale.setScalar(sc);dm.updateMatrix();ptM.setMatrixAt(i,dm.matrix);
     let col;
@@ -254,6 +325,7 @@ function updPts(){
     else if(bellAncestors.has(i)){col=new THREE.Color(0xff8800)}
     else if(pulseActive.has(i)){col=cPulseC}
     else if(age<1.0){col=new THREE.Color(0x00ff88)}
+    else if(sHeatmap){col=heatColor(p.chainDepth,maxDepth)}
     else if(sGen){col=genCols[p.gen]}
     else{col=cDefault}
     ptM.instanceColor.setXYZ(i,col.r,col.g,col.b);
@@ -468,6 +540,7 @@ function loop(t){
   if(!drag)cTh+=0.0005;
   const n=vc();if(n>10)cTgt.y+=(pts[n-1].t*0.7*0.6-cTgt.y)*0.02;
   uC();
+  updateSparks();
   if(fr%4===0)updPts();
   if(fr%14===0){rebuildLinks();rebuildTrail();if(sChain){compChain();rebuildChain()}if(sCones)rebuildCones()}
   if(sPulse&&fr%5===0)stepPulse();
@@ -480,7 +553,7 @@ function loop(t){
     document.getElementById('sC').textContent=chn.length;
     document.getElementById('sT').textContent=(n>0?pts[n-1].t:0).toFixed(1);
   }
-  R.render(scene,camera);
+  composer.render();
 }
 requestAnimationFrame(loop);
 
@@ -493,12 +566,13 @@ tog('bGen',()=>sGen,v=>sGen=v);
 tog('bChain',()=>sChain,v=>sChain=v);
 tog('bCones',()=>sCones,v=>sCones=v);
 tog('bTrail',()=>sTrail,v=>sTrail=v);
+tog('bHeat',()=>sHeatmap,v=>sHeatmap=v);
 document.getElementById('bPulse').onclick=function(){startPulse();this.classList.add('on');setTimeout(()=>this.classList.remove('on'),3000)};
 document.getElementById('bBell').onclick=function(){runBellTest();this.classList.add('on');document.getElementById('bellPanel').classList.remove('hide');setTimeout(()=>{this.classList.remove('on');document.getElementById('bellPanel').classList.add('hide')},5000)};
 document.getElementById('bBang').onclick=startBigBang;
 document.getElementById('bPause').onclick=function(){paused=!paused;this.textContent=paused?'Resume':'Pause';this.classList.toggle('on')};
 document.getElementById('bReset').onclick=function(){pts=[];lnk=[];chn=[];maxT=0;bigBang=false;bbIdx=0;bbBorn=[];ptM.count=0;[linkGrp,chainGrp,trailGrp,coneGrp].forEach(g=>{while(g.children.length)g.remove(g.children[0])});pulseActive.clear();bellActive.clear();bellAncestors.clear();while(bellLines.length){const l=bellLines.pop();scene.remove(l)}sBell=false;cTgt.set(0,2,0)};
-window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();R.setSize(innerWidth,innerHeight)});
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();R.setSize(innerWidth,innerHeight);composer.setSize(innerWidth,innerHeight)});
 
 </script>
 </body>
