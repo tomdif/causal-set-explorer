@@ -159,11 +159,15 @@ R.toneMapping=THREE.ReinhardToneMapping;R.toneMappingExposure=1.2;
 document.body.prepend(R.domElement);
 
 /* ---- BLOOM POST-PROCESSING ---- */
-const composer=new THREE.EffectComposer(R);
-composer.addPass(new THREE.RenderPass(scene,camera));
-const bloomPass=new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),0.8,0.4,0.85);
-bloomPass.threshold=0.15;bloomPass.strength=0.8;bloomPass.radius=0.4;
-composer.addPass(bloomPass);
+let composer=null,useBloom=false;
+try{
+  composer=new THREE.EffectComposer(R);
+  composer.addPass(new THREE.RenderPass(scene,camera));
+  const bloomPass=new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),0.8,0.4,0.85);
+  bloomPass.threshold=0.15;bloomPass.strength=0.8;bloomPass.radius=0.4;
+  composer.addPass(bloomPass);
+  useBloom=true;
+}catch(e){console.warn('Bloom not available:',e)}
 
 let drag=false,pm={x:0,y:0},cTh=0.3,cPh=1.0,cD=18,cTgt=new THREE.Vector3(0,2,0);
 function uC(){camera.position.set(cTgt.x+cD*Math.sin(cPh)*Math.sin(cTh),cTgt.y+cD*Math.cos(cPh),cTgt.z+cD*Math.sin(cPh)*Math.cos(cTh));camera.lookAt(cTgt)}
@@ -258,6 +262,7 @@ const sparkPos=new Float32Array(SPARK_MAX*3);
 const sparkVel=new Float32Array(SPARK_MAX*3);
 const sparkLife=new Float32Array(SPARK_MAX);
 const sparkCol=new Float32Array(SPARK_MAX*3);
+for(let i=0;i<SPARK_MAX;i++){sparkPos[i*3+1]=-999;sparkLife[i]=-1} // init offscreen
 sparkGeo.setAttribute('position',new THREE.Float32BufferAttribute(sparkPos,3));
 sparkGeo.setAttribute('color',new THREE.Float32BufferAttribute(sparkCol,3));
 const sparkMat=new THREE.PointsMaterial({size:0.08,vertexColors:true,transparent:true,opacity:0.9,blending:THREE.AdditiveBlending,depthWrite:false});
@@ -554,7 +559,7 @@ function loop(t){
     document.getElementById('sC').textContent=chn.length;
     document.getElementById('sT').textContent=(n>0?pts[n-1].t:0).toFixed(1);
   }
-  composer.render();
+  if(useBloom)composer.render();else R.render(scene,camera);
 }
 requestAnimationFrame(loop);
 
@@ -573,7 +578,7 @@ document.getElementById('bBell').onclick=function(){runBellTest();this.classList
 document.getElementById('bBang').onclick=startBigBang;
 document.getElementById('bPause').onclick=function(){paused=!paused;this.textContent=paused?'Resume':'Pause';this.classList.toggle('on')};
 document.getElementById('bReset').onclick=function(){pts=[];lnk=[];chn=[];maxT=0;bigBang=false;bbIdx=0;bbBorn=[];ptM.count=0;[linkGrp,chainGrp,trailGrp,coneGrp].forEach(g=>{while(g.children.length)g.remove(g.children[0])});pulseActive.clear();bellActive.clear();bellAncestors.clear();while(bellLines.length){const l=bellLines.pop();scene.remove(l)}sBell=false;cTgt.set(0,2,0)};
-window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();R.setSize(innerWidth,innerHeight);composer.setSize(innerWidth,innerHeight)});
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();R.setSize(innerWidth,innerHeight);if(useBloom)composer.setSize(innerWidth,innerHeight)});
 
 </script>
 </body>
